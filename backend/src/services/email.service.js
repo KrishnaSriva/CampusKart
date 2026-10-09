@@ -8,7 +8,7 @@ dns.setDefaultResultOrder('ipv4first');
 const OAuth2 = google.auth.OAuth2;
 
 const createTransporter = async () => {
-  // If an App Password is provided, use the simpler basic auth approach
+  // If an App Password is provided, use the reliable direct SMTP approach
   if (process.env.GOOGLE_APP_PASSWORD) {
     return nodemailer.createTransport({
       service: 'gmail',
@@ -16,14 +16,17 @@ const createTransporter = async () => {
         user: process.env.GOOGLE_USER,
         pass: process.env.GOOGLE_APP_PASSWORD,
       },
+      connectionTimeout: 10000, // 10s timeout
+      greetingTimeout: 10000,
+      socketTimeout: 15000,
     });
   }
 
-  // Fallback to the existing OAuth2 method
+  // Fallback to the OAuth2 method
   const oauth2Client = new OAuth2(
     process.env.GOOGLE_CLIENT_ID,
     process.env.GOOGLE_CLIENT_SECRET,
-    'https://developers.google.com/oauthplayground' // Redirect URL
+    'https://developers.google.com/oauthplayground'
   );
 
   oauth2Client.setCredentials({
@@ -40,7 +43,7 @@ const createTransporter = async () => {
     });
   });
 
-  const transporter = nodemailer.createTransport({
+  return nodemailer.createTransport({
     service: 'gmail',
     auth: {
       type: 'OAuth2',
@@ -50,19 +53,22 @@ const createTransporter = async () => {
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
       refreshToken: process.env.GOOGLE_REFRESH_TOKEN,
     },
+    connectionTimeout: 10000,
+    greetingTimeout: 10000,
+    socketTimeout: 15000,
   });
-
-  return transporter;
 };
 
 // Expose a helper method for sending emails easily throughout the app
 const sendEmail = async (emailOptions) => {
   try {
     const emailTransporter = await createTransporter();
-    await emailTransporter.sendMail(emailOptions);
-    console.log(`Email successfully sent to ${emailOptions.to}`);
+    const info = await emailTransporter.sendMail(emailOptions);
+    console.log(`Email successfully sent to ${emailOptions.to}: ${info?.messageId}`);
+    return info;
   } catch (err) {
-    console.error(`Error sending email`, err);
+    console.error(`Error sending email to ${emailOptions.to}:`, err.message);
+    throw err;
   }
 };
 

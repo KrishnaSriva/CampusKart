@@ -62,6 +62,7 @@ exports.verifyOTP = async (req, res) => {
   try {
     let { email, otp } = req.body;
     email = email ? email.trim().toLowerCase() : '';
+    otp = otp ? otp.toString().replace(/\s+/g, '').trim() : '';
 
     const validOtp = await OTP.findOne({ email, code: otp });
     if (!validOtp) {
@@ -253,10 +254,11 @@ exports.resetPassword = async (req, res) => {
   try {
     let { email, otp, newPassword } = req.body;
     email = email ? email.trim().toLowerCase() : '';
+    otp = otp ? otp.toString().replace(/\s+/g, '').trim() : '';
 
     const validOtp = await OTP.findOne({ email, code: otp });
     if (!validOtp) {
-      return res.status(400).json({ success: false, message: 'Invalid or expired OTP.' });
+      return res.status(400).json({ success: false, message: 'Invalid or expired OTP. Please check the latest email code.' });
     }
 
     const user = await User.findOne({ email });

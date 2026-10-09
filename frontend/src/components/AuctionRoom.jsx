@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import api from '../api/axiosInstance';
+import api, { SOCKET_URL } from '../api/axiosInstance';
 import { AuthContext } from '../context/AuthContext';
 import io from 'socket.io-client';
 import { Clock, Gavel, History, TrendingUp, AlertCircle } from 'lucide-react';
@@ -31,7 +31,7 @@ const AuctionRoom = () => {
   useEffect(() => {
     if (!user) return;
 
-    const newSocket = io('http://localhost:5000');
+    const newSocket = io(SOCKET_URL);
     setSocket(newSocket);
 
     newSocket.emit('join_room', { roomId: id, userId: user._id, type: 'auction' });

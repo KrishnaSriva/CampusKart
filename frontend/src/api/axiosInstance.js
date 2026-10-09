@@ -1,10 +1,16 @@
 import axios from 'axios';
 
+const BACKEND_URL = import.meta.env.VITE_API_URL 
+  || (import.meta.env.MODE === 'development' ? 'http://localhost:5000' : 'https://campuskart-wxbq.onrender.com');
+
+// Strip trailing slash if present, ensure /api is attached
+const cleanBackendUrl = BACKEND_URL.replace(/\/+$/, '');
+const API_BASE = cleanBackendUrl.endsWith('/api') ? cleanBackendUrl : `${cleanBackendUrl}/api`;
+export const SOCKET_URL = cleanBackendUrl.replace(/\/api$/, '');
+
 // Axios instance with base URL
 const api = axios.create({
-  baseURL: import.meta.env.MODE === 'development' 
-    ? 'http://localhost:5000/api' 
-    : 'https://campuskart-3mzo.onrender.com/api',
+  baseURL: API_BASE,
 });
 
 // Attach the access token to every request

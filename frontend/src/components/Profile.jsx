@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useContext } from 'react';
 import axios from 'axios';
+import api from '../api/axiosInstance';
 import { AuthContext } from '../context/AuthContext';
 import {
   Edit2, Trash2, X, Check, Package, ShoppingBag, Clock,
@@ -32,10 +33,7 @@ const Profile = () => {
   const fetchMyProducts = async () => {
     setLoading(true);
     try {
-      const token = localStorage.getItem('token');
-      const res = await axios.get('http://localhost:5000/api/products/my-products', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const res = await api.get('/products/my-products');
       if (res.data.success) {
         setProducts(res.data.data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)));
       } else {
@@ -51,10 +49,7 @@ const Profile = () => {
   const handleDelete = async (id) => {
     if (!window.confirm('Are you sure you want to delete this listing?')) return;
     try {
-      const token = localStorage.getItem('token');
-      await axios.delete(`http://localhost:5000/api/products/${id}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      await api.delete(`/products/${id}`);
       setProducts(p => p.filter(x => x._id !== id));
     } catch (err) {
       alert(err.response?.data?.message || 'Failed to delete.');
@@ -63,10 +58,7 @@ const Profile = () => {
 
   const handleStatusChange = async (id, newStatus) => {
     try {
-      const token = localStorage.getItem('token');
-      await axios.patch(`http://localhost:5000/api/products/${id}`, { status: newStatus }, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      await api.patch(`/products/${id}`, { status: newStatus });
       setProducts(p => p.map(x => x._id === id ? { ...x, status: newStatus } : x));
     } catch (err) {
       alert(err.response?.data?.message || 'Failed to update status.');
@@ -86,11 +78,8 @@ const Profile = () => {
   const handleEditSubmit = async (e) => {
     e.preventDefault();
     try {
-      const token = localStorage.getItem('token');
       // Use PATCH so multer doesn't intercept the JSON body
-      await axios.patch(`http://localhost:5000/api/products/${editingProduct}`, editForm, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      await api.patch(`/products/${editingProduct}`, editForm);
       setEditingProduct(null);
       // Optimistically update the local card to show pending_approval immediately
       setProducts(p => p.map(x => x._id === editingProduct

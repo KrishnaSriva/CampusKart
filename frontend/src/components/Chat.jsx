@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext, useRef } from 'react';
-import api from '../api/axiosInstance';
+import api, { SOCKET_URL } from '../api/axiosInstance';
 import { AuthContext } from '../context/AuthContext';
 import { io } from 'socket.io-client';
 import { 
@@ -49,7 +49,7 @@ const Chat = () => {
       } catch (err) { console.error(err); }
     };
     fetchData();
-    const newSocket = io('http://localhost:5000');
+    const newSocket = io(SOCKET_URL);
     setSocket(newSocket);
     newSocket.emit('user_online', user._id);
     return () => newSocket.disconnect();

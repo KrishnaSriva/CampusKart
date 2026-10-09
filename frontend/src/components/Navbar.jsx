@@ -1,10 +1,16 @@
 import React, { useContext } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import { ShoppingCart, LogOut, User } from 'lucide-react';
 
 const Navbar = () => {
   const { user, logout } = useContext(AuthContext);
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
 
   return (
     <nav className="w-full bg-[#030a0d]/90 backdrop-blur-xl border-b border-teal-900/50 sticky top-0 z-50 flex justify-between items-center px-6 py-4 shadow-[0_4px_30px_rgba(0,0,0,0.8)]">
@@ -44,7 +50,7 @@ const Navbar = () => {
               <User size={20} />
               Profile
             </Link>
-            <button onClick={logout} className="ml-2 flex items-center gap-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 hover:text-red-300 border border-red-500/20 rounded-xl px-4 py-2 transition-all shadow-md">
+            <button onClick={handleLogout} className="ml-2 flex items-center gap-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 hover:text-red-300 border border-red-500/20 rounded-xl px-4 py-2 transition-all shadow-md">
               <LogOut size={18} />
               Log out
             </button>
